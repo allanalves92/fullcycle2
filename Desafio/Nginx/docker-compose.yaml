@@ -1,0 +1,45 @@
+version: '3'
+services:
+  nodejs-app:
+    build:
+      context: node
+    container_name: app
+    entrypoint: 'dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh'
+    command: bash -c "
+        npm install --save 
+        && npm start
+      "
+    networks:
+      - desafio
+    volumes:
+      - './node:/usr/src/app'
+    tty: true
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+  db:
+    build:
+      context: mysqldb
+    command: '--innodb-use-native-aio=0'
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - './mysqldb:/var/lib/mysqldb'
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - desafio
+  nginx:
+    build:
+      context: nginx
+    container_name: nginx
+    networks:
+      - desafio
+    ports:
+      - '8080:80'
+networks:
+  desafio:
+    driver: bridge

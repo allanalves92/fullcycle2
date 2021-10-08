@@ -1,13 +1,13 @@
 version: '3'
 services:
-  nodejs-app:
+  app:
     build:
       context: node
     container_name: app
     entrypoint: 'dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh'
     command: bash -c "
-        npm install --save 
-        && npm start
+      npm install --save
+      && npm start
       "
     networks:
       - desafio
@@ -40,6 +40,8 @@ services:
       - desafio
     ports:
       - '8080:80'
+    depends_on:
+      - app
 networks:
   desafio:
     driver: bridge
